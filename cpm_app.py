@@ -47,7 +47,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-header"><h1>📊 Critical Path Method (CPM) Analysis</h1><p>Network Diagram & Schedule Management</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header"><h1>📊 Critical Path Method (CPM) Analysis By Athila</h1><p>Network Diagram & Schedule Management</p></div>', unsafe_allow_html=True)
 
 # --------------------- DATA ---------------------
 if 'activities' not in st.session_state:
