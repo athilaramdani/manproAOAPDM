@@ -26,6 +26,24 @@ st.markdown("""
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         text-align: center;
     }
+    .tutorial-box {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #1f77b4;
+        margin: 10px 0;
+    }
+    .formula-table {
+        font-size: 0.85em;
+        margin: 10px 0;
+    }
+    .example-box {
+        background: #fff3cd;
+        padding: 12px;
+        border-radius: 6px;
+        border-left: 4px solid #ffc107;
+        margin: 10px 0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -63,6 +81,236 @@ with st.sidebar:
         st.session_state.activities = edited_df.to_dict('records')
         st.rerun()
 
+    st.markdown("---")
+    
+    # --------------------- TUTORIAL PDM ---------------------
+    st.markdown("### 📖 Tutorial PDM")
+    
+    with st.expander("🔹 1. Rumus Dasar CPM", expanded=False):
+        st.markdown("""
+        <div class="tutorial-box">
+        <table class="formula-table" style="width:100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background-color: #e3f2fd;">
+                <th style="padding: 8px; border: 1px solid #ddd;">Simbol</th>
+                <th style="padding: 8px; border: 1px solid #ddd;">Arti</th>
+                <th style="padding: 8px; border: 1px solid #ddd;">Rumus</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;"><strong>ES</strong><br/>(Early Start)</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Waktu paling awal kegiatan bisa dimulai</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">= <strong>EF</strong> kegiatan sebelumnya <strong>terbesar</strong></td>
+            </tr>
+            <tr style="background-color: #f8f9fa;">
+                <td style="padding: 8px; border: 1px solid #ddd;"><strong>EF</strong><br/>(Early Finish)</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Waktu paling awal kegiatan bisa selesai</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">= <strong>ES + Duration</strong></td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;"><strong>LF</strong><br/>(Late Finish)</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Waktu paling akhir kegiatan bisa selesai tanpa tunda proyek</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">= <strong>LS</strong> kegiatan sesudahnya <strong>terkecil</strong></td>
+            </tr>
+            <tr style="background-color: #f8f9fa;">
+                <td style="padding: 8px; border: 1px solid #ddd;"><strong>LS</strong><br/>(Late Start)</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Waktu paling akhir kegiatan bisa dimulai tanpa tunda proyek</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">= <strong>LF - Duration</strong></td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;"><strong>TS</strong><br/>(Total Slack)</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Waktu longgar total (total float)</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">= <strong>LS - ES</strong><br/>atau <strong>LF - EF</strong></td>
+            </tr>
+            <tr style="background-color: #f8f9fa;">
+                <td style="padding: 8px; border: 1px solid #ddd;"><strong>FF</strong><br/>(Free Float)</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Waktu longgar bebas (tanpa pengaruh ke successor)</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">= <strong>ES(successor) - EF(current)</strong></td>
+            </tr>
+        </tbody>
+        </table>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with st.expander("🔹 2. Aturan Gabungan Node (Multiple Predecessors)", expanded=False):
+        st.markdown("""
+        <div class="tutorial-box">
+        <p><strong>Aturan:</strong> Kalau sebuah aktivitas punya <strong>dua atau lebih pendahulu</strong>, maka ES-nya diambil dari <strong>EF terbesar</strong> dari semua pendahulunya.</p>
+        </div>
+        
+        <div class="example-box">
+        <p><strong>📌 Contoh:</strong></p>
+        
+        <table style="width:100%; border-collapse: collapse; font-size: 0.9em; margin: 10px 0;">
+        <thead>
+            <tr style="background-color: #fff3cd;">
+                <th style="padding: 6px; border: 1px solid #ddd;">Aktivitas</th>
+                <th style="padding: 6px; border: 1px solid #ddd;">Duration</th>
+                <th style="padding: 6px; border: 1px solid #ddd;">Predecessor</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td style="padding: 6px; border: 1px solid #ddd;">A</td><td style="padding: 6px; border: 1px solid #ddd;">3</td><td style="padding: 6px; border: 1px solid #ddd;">–</td></tr>
+            <tr><td style="padding: 6px; border: 1px solid #ddd;">B</td><td style="padding: 6px; border: 1px solid #ddd;">4</td><td style="padding: 6px; border: 1px solid #ddd;">A</td></tr>
+            <tr><td style="padding: 6px; border: 1px solid #ddd;">C</td><td style="padding: 6px; border: 1px solid #ddd;">6</td><td style="padding: 6px; border: 1px solid #ddd;">A</td></tr>
+            <tr><td style="padding: 6px; border: 1px solid #ddd;">D</td><td style="padding: 6px; border: 1px solid #ddd;">5</td><td style="padding: 6px; border: 1px solid #ddd;">B, C</td></tr>
+        </tbody>
+        </table>
+        
+        <p><strong>Perhitungan:</strong></p>
+        <ul style="font-size: 0.9em; line-height: 1.6;">
+        <li><strong>A:</strong> ES = 0, EF = 0 + 3 = <strong>3</strong></li>
+        <li><strong>B:</strong> ES = 3, EF = 3 + 4 = <strong>7</strong></li>
+        <li><strong>C:</strong> ES = 3, EF = 3 + 6 = <strong>9</strong></li>
+        <li><strong>D:</strong> Karena D punya dua pendahulu (B dan C), ambil <strong>EF terbesar</strong>:<br/>
+        ES(D) = max(EF<sub>B</sub>, EF<sub>C</sub>) = max(7, 9) = <strong>9</strong><br/>
+        EF(D) = 9 + 5 = <strong>14</strong></li>
+        </ul>
+        
+        <p style="margin-top: 10px; padding: 8px; background-color: #d1ecf1; border-radius: 4px; font-size: 0.85em;">
+        💡 <strong>Kesimpulan:</strong> Aktivitas D harus menunggu sampai aktivitas C selesai (yang lebih lama) sebelum bisa dimulai.
+        </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with st.expander("🔹 3. Aturan Percabangan Node (Multiple Successors)", expanded=False):
+        st.markdown("""
+        <div class="tutorial-box">
+        <p><strong>Aturan:</strong> Kalau sebuah aktivitas punya <strong>dua atau lebih penerus</strong>, maka LF-nya diambil dari <strong>LS terkecil</strong> dari semua penerusnya.</p>
+        </div>
+        
+        <div class="example-box">
+        <p><strong>📌 Contoh (Lanjutan dari contoh sebelumnya):</strong></p>
+        
+        <p>Misal dari aktivitas D ada dua cabang:</p>
+        
+        <table style="width:100%; border-collapse: collapse; font-size: 0.9em; margin: 10px 0;">
+        <thead>
+            <tr style="background-color: #fff3cd;">
+                <th style="padding: 6px; border: 1px solid #ddd;">Aktivitas</th>
+                <th style="padding: 6px; border: 1px solid #ddd;">Duration</th>
+                <th style="padding: 6px; border: 1px solid #ddd;">Predecessor</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td style="padding: 6px; border: 1px solid #ddd;">E</td><td style="padding: 6px; border: 1px solid #ddd;">4</td><td style="padding: 6px; border: 1px solid #ddd;">D</td></tr>
+            <tr><td style="padding: 6px; border: 1px solid #ddd;">F</td><td style="padding: 6px; border: 1px solid #ddd;">6</td><td style="padding: 6px; border: 1px solid #ddd;">D</td></tr>
+        </tbody>
+        </table>
+        
+        <p><strong>Backward Pass (dari akhir proyek):</strong></p>
+        <p>Misalkan LF proyek = 20</p>
+        
+        <ul style="font-size: 0.9em; line-height: 1.6;">
+        <li><strong>E:</strong> LF = 20, LS = 20 - 4 = <strong>16</strong></li>
+        <li><strong>F:</strong> LF = 20, LS = 20 - 6 = <strong>14</strong></li>
+        <li><strong>D:</strong> Karena D punya dua successor (E dan F), ambil <strong>LS terkecil</strong>:<br/>
+        LF(D) = min(LS<sub>E</sub>, LS<sub>F</sub>) = min(16, 14) = <strong>14</strong><br/>
+        LS(D) = 14 - 5 = <strong>9</strong></li>
+        </ul>
+        
+        <p style="margin-top: 10px; padding: 8px; background-color: #d1ecf1; border-radius: 4px; font-size: 0.85em;">
+        💡 <strong>Kesimpulan:</strong> Aktivitas D harus selesai maksimal di waktu 14 agar aktivitas F (yang paling ketat) tidak terlambat.
+        </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with st.expander("🔹 4. Interpretasi Slack & Critical Path", expanded=False):
+        st.markdown("""
+        <div class="tutorial-box">
+        <table style="width:100%; border-collapse: collapse; font-size: 0.9em;">
+        <thead>
+            <tr style="background-color: #e3f2fd;">
+                <th style="padding: 8px; border: 1px solid #ddd;">Nilai TS</th>
+                <th style="padding: 8px; border: 1px solid #ddd;">Arti</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;"><strong>0</strong></td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Aktivitas <strong>kritis</strong> (harus tepat waktu, tidak ada kelonggaran)</td>
+            </tr>
+            <tr style="background-color: #f8f9fa;">
+                <td style="padding: 8px; border: 1px solid #ddd;"><strong>&gt; 0</strong></td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Aktivitas <strong>non-kritis</strong> (masih ada kelonggaran waktu)</td>
+            </tr>
+        </tbody>
+        </table>
+        </div>
+        
+        <div class="example-box">
+        <p><strong>🎯 Critical Path (Jalur Kritis):</strong></p>
+        <ul style="font-size: 0.9em; line-height: 1.6;">
+        <li>Jalur yang terdiri dari aktivitas-aktivitas dengan <strong>TS = 0</strong></li>
+        <li>Jalur yang menentukan <strong>durasi minimum proyek</strong></li>
+        <li>Jika ada keterlambatan di jalur ini, <strong>seluruh proyek akan terlambat</strong></li>
+        <li>Ditampilkan dengan <strong>warna merah</strong> pada diagram</li>
+        </ul>
+        
+        <p style="margin-top: 10px;"><strong>📊 Total Slack (TS) vs Free Float (FF):</strong></p>
+        <ul style="font-size: 0.9em; line-height: 1.6;">
+        <li><strong>Total Slack (TS):</strong> Berapa lama aktivitas bisa ditunda tanpa menunda proyek</li>
+        <li><strong>Free Float (FF):</strong> Berapa lama aktivitas bisa ditunda tanpa mempengaruhi aktivitas berikutnya</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with st.expander("🔹 5. Contoh Visualisasi PDM", expanded=False):
+        st.markdown("""
+        <div class="tutorial-box">
+        <p><strong>Format Box Aktivitas di Diagram PDM:</strong></p>
+        </div>
+        
+        <div style="text-align: center; margin: 15px 0;">
+        <svg width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+            <!-- Box -->
+            <rect x="10" y="10" width="180" height="120" rx="8" fill="#cce5ff" stroke="black" stroke-width="2"/>
+            
+            <!-- Activity Name -->
+            <text x="100" y="50" font-size="20" font-weight="bold" text-anchor="middle" fill="black">A</text>
+            <text x="100" y="70" font-size="12" text-anchor="middle" fill="black" font-style="italic">D=3</text>
+            
+            <!-- ES (top-left) -->
+            <text x="30" y="30" font-size="10" font-weight="bold" text-anchor="middle" fill="blue">ES</text>
+            <text x="30" y="42" font-size="10" font-weight="bold" text-anchor="middle" fill="blue">0</text>
+            
+            <!-- EF (top-right) -->
+            <text x="170" y="30" font-size="10" font-weight="bold" text-anchor="middle" fill="blue">EF</text>
+            <text x="170" y="42" font-size="10" font-weight="bold" text-anchor="middle" fill="blue">3</text>
+            
+            <!-- LS (bottom-left) -->
+            <text x="30" y="105" font-size="10" font-weight="bold" text-anchor="middle" fill="green">LS</text>
+            <text x="30" y="117" font-size="10" font-weight="bold" text-anchor="middle" fill="green">0</text>
+            
+            <!-- LF (bottom-right) -->
+            <text x="170" y="105" font-size="10" font-weight="bold" text-anchor="middle" fill="green">LF</text>
+            <text x="170" y="117" font-size="10" font-weight="bold" text-anchor="middle" fill="green">3</text>
+            
+            <!-- FF label (above box) -->
+            <rect x="75" y="-5" width="50" height="18" rx="4" fill="#c8e6c9" stroke="black" stroke-width="1"/>
+            <text x="100" y="8" font-size="9" text-anchor="middle" fill="black">FF: 0</text>
+            
+            <!-- TS label (below box) -->
+            <rect x="75" y="132" width="50" height="18" rx="4" fill="#fff9c4" stroke="black" stroke-width="1"/>
+            <text x="100" y="145" font-size="9" text-anchor="middle" fill="black">TS: 0</text>
+        </svg>
+        </div>
+        
+        <div class="example-box" style="font-size: 0.85em;">
+        <p><strong>Keterangan:</strong></p>
+        <ul style="line-height: 1.6;">
+        <li><strong style="color: blue;">ES (Early Start)</strong> - Pojok kiri atas</li>
+        <li><strong style="color: blue;">EF (Early Finish)</strong> - Pojok kanan atas</li>
+        <li><strong style="color: green;">LS (Late Start)</strong> - Pojok kiri bawah</li>
+        <li><strong style="color: green;">LF (Late Finish)</strong> - Pojok kanan bawah</li>
+        <li><strong>D (Duration)</strong> - Di tengah, di bawah nama aktivitas</li>
+        <li><strong>FF (Free Float)</strong> - Label di atas box (background hijau)</li>
+        <li><strong>TS (Total Slack)</strong> - Label di bawah box (background kuning)</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
     st.markdown("---")
     st.markdown("### 📖 Legend")
     st.markdown("**ES** = Early Start  •  **EF** = Early Finish")
@@ -143,11 +391,12 @@ def hierarchical_layout_aoa(G):
             TE[v] = max(TE[v], TE[u] + G[u][v].get('duration', 0))
 
     uniq_te = sorted(set(TE.values()))
-    col_of = {t:i for i,t in enumerate(uniq_te)}
+    col_of = {t: i for i, t in enumerate(uniq_te)}
     node_col = {n: col_of[TE[n]] for n in topo}
 
     columns = defaultdict(list)
-    for n in topo: columns[node_col[n]].append(n)
+    for n in topo:
+        columns[node_col[n]].append(n)
 
     x_spacing, y_spacing = 3.5, 2.0
     pos = {}
@@ -163,12 +412,11 @@ def hierarchical_layout_aoa(G):
     for c in columns:
         def bary(n):
             sc = [node_col[s] for s in G.successors(n)]
-            return (sum(sc)/len(sc)) if sc else c
+            return (sum(sc) / len(sc)) if sc else c
         columns[c].sort(key=lambda n: (bary(n), n))
     for c in sorted(columns):
-        col_nodes = columns[c]
-        for j, n in enumerate(col_nodes):
-            pos[n] = (c * x_spacing, 0.0)  # Y akan di-set oleh lane
+        for j, n in enumerate(columns[c]):
+            pos[n] = (c * x_spacing, 0.0)  # Y diset oleh lane
 
     # lanes
     parent_lane = {}
@@ -180,7 +428,7 @@ def hierarchical_layout_aoa(G):
             preds = list(G.predecessors(n))
             parent_lane[n] = parent_lane.get(preds[0], 0) if preds else 0
 
-    # spread multi-children: -1, +1, -2, +2, ...
+    # sebar anak multi-branch: -1,+1,-2,+2,...
     for n in topo:
         succs = list(G.successors(n))
         if len(succs) >= 2:
@@ -189,222 +437,219 @@ def hierarchical_layout_aoa(G):
                 downstream = len(nx.descendants(G, s))
                 return (-hits_sib, -downstream, s)
             succs_sorted = sorted(succs, key=child_priority)
-            offs = []
-            d = 1
+            offs, d = [], 1
             while len(offs) < len(succs_sorted):
                 offs.append(-d)
-                if len(offs) < len(succs_sorted): offs.append(+d)
+                if len(offs) < len(succs_sorted):
+                    offs.append(+d)
                 d += 1
             for i, s in enumerate(succs_sorted):
                 parent_lane[s] = parent_lane[n] + offs[i]
 
-    # ahead bias (sedikit) untuk yang menerima dari sibling
+    # ahead bias tipis untuk node yang terima/lempar ke sibling
     for c in sorted(columns):
         by_par = defaultdict(list)
         for n in columns[c]:
             key = tuple(sorted(G.predecessors(n)))
             by_par[key].append(n)
         for sibs in by_par.values():
-            if len(sibs) <= 1: continue
+            if len(sibs) <= 1:
+                continue
             for n in sibs:
                 x, y = pos[n]
                 succ = list(G.successors(n))
                 in_from_sib = any(p in sibs for p in G.predecessors(n))
                 out_to_sib = any(s in sibs for s in succ)
                 ax = 0.0
-                if in_from_sib: ax += 0.40 * x_spacing
-                if out_to_sib:  ax += 0.15 * x_spacing
-                if any(G.out_degree(s) == 0 for s in succ): ax += 0.12 * x_spacing
+                if in_from_sib:
+                    ax += 0.40 * x_spacing
+                if out_to_sib:
+                    ax += 0.15 * x_spacing
+                if any(G.out_degree(s) == 0 for s in succ):
+                    ax += 0.12 * x_spacing
                 pos[n] = (x + ax, y)
 
-    # Y from lane (murni) + jitter tipis
+    # set Y dari lane + jitter halus biar gak numpuk
     for c in sorted(columns):
-        col_nodes = columns[c]
         groups = defaultdict(list)
-        for n in col_nodes:
-            groups[tuple(sorted(G.predecessors(n)))] .append(n)
+        for n in columns[c]:
+            groups[tuple(sorted(G.predecessors(n)))].append(n)
         for sibs in groups.values():
             if len(sibs) == 1:
                 n = sibs[0]
-                x,_ = pos[n]
-                pos[n] = (x, -parent_lane.get(n,0)*y_spacing)
+                x, _ = pos[n]
+                pos[n] = (x, -parent_lane.get(n, 0) * y_spacing)
                 continue
             def vscore(n):
                 succ = list(G.successors(n))
                 out_to_sib = sum(1 for s in succ if s in sibs)
                 in_from_sib = sum(1 for p in G.predecessors(n) if p in sibs)
                 branch = len(succ)
-                return (2*out_to_sib) - (2*in_from_sib) + 0.5*branch
-            sibs.sort(key=lambda n:(-vscore(n), n))
+                return (2 * out_to_sib) - (2 * in_from_sib) + 0.5 * branch
+            sibs.sort(key=lambda n: (-vscore(n), n))
             k = len(sibs)
-            for i,n in enumerate(sibs):
-                x,_ = pos[n]
-                base_y = -parent_lane.get(n,0)*y_spacing
-                jitter = (i - (k-1)/2) * 0.25
+            for i, n in enumerate(sibs):
+                x, _ = pos[n]
+                base_y = -parent_lane.get(n, 0) * y_spacing
+                jitter = (i - (k - 1) / 2) * 0.25
                 pos[n] = (x, base_y + jitter)
 
-    # push long-jump children a bit lower/higher
+    # dorong turun/naik kalau ada “long jump” (gap kolom besar)
     for n in G.nodes():
-        x,y = pos[n]
-        succ = list(G.successors(n)); pred = list(G.predecessors(n))
-        out_jumps = sum(max(0,(node_col[s]-node_col[n])) for s in succ)
-        in_jumps  = sum(max(0,(node_col[n]-node_col[p])) for p in pred)
-        y += 0.40*(out_jumps - in_jumps)
-        pos[n] = (x,y)
+        x, y = pos[n]
+        succ = list(G.successors(n))
+        pred = list(G.predecessors(n))
+        out_jumps = sum(max(0, (node_col[s] - node_col[n])) for s in succ)
+        in_jumps = sum(max(0, (node_col[n] - node_col[p])) for p in pred)
+        y += 0.40 * (out_jumps - in_jumps)
+        pos[n] = (x, y)
 
-    # extra drop for nodes that came from long jump (e.g., 2->6)
+    # ekstra drop untuk anak dari long jump (mis. 2→6)
     for n in G.nodes():
-        x,y = pos[n]
+        x, y = pos[n]
         for p in G.predecessors(n):
-            col_gap = node_col[n]-node_col[p]
+            col_gap = node_col[n] - node_col[p]
             if col_gap >= 2:
-                y -= 0.8*y_spacing*(col_gap-1)
-        pos[n] = (x,y)
+                y -= 0.8 * y_spacing * (col_gap - 1)
+        pos[n] = (x, y)
 
-    # force left-most sources, right-most sinks aligned to extreme columns
+    # align sumber paling kiri & muara paling kanan
     first_col, last_col = min(columns), max(columns)
     for n in G.nodes():
-        x,y = pos[n]
-        if G.in_degree(n)==0:  pos[n]=(first_col*x_spacing, y)
-        if G.out_degree(n)==0: pos[n]=(last_col*x_spacing,  y)
+        x, y = pos[n]
+        if G.in_degree(n) == 0:
+            pos[n] = (first_col * x_spacing, y)
+        if G.out_degree(n) == 0:
+            pos[n] = (last_col * x_spacing, y)
 
     return pos, parent_lane
 
-# --------------------- MAIN CALC ---------------------
+
+# --------------------- MAIN LOGIC ---------------------
 try:
     activity_metrics, project_duration, G = calculate_cpm(st.session_state.activities)
+    critical_activities = [a for a, m in activity_metrics.items() if m['TS'] == 0]
+
     nodes = sorted(G.nodes())
     start_node, end_node = min(nodes), max(nodes)
-
     all_paths = find_all_paths(G, start_node, end_node)
     path_info = []
     for p in all_paths:
         acts, dur = get_path_info(G, p)
-        path_info.append({'path': ' → '.join(map(str,p)),
-                          'activities': ' → '.join(acts),
-                          'duration': dur})
-    path_info.sort(key=lambda x: x['duration'], reverse=True)
-    critical_path_info = path_info[0]
-    critical_activities = critical_path_info['activities'].split(' → ')
+        path_info.append({
+            'Path': ' → '.join(acts),
+            'Duration': dur,
+            'Critical': 'Yes' if dur == project_duration else 'No'
+        })
 
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Summary", "🗺️ AOA Diagram", "📦 PDM Diagram", "📋 Detailed Metrics"])
+    # --------------------- TABS ---------------------
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Summary", "🗺️ AOA Network Diagram", "📐 PDM Diagram", "📋 Detailed Metrics"])
 
     # --------------------- SUMMARY ---------------------
     with tab1:
-        c1,c2,c3,c4 = st.columns(4)
-        with c1: st.markdown('<div class="metric-card">', unsafe_allow_html=True); st.metric("🎯 Project Duration", f"{project_duration} days"); st.markdown('</div>', unsafe_allow_html=True)
-        with c2: st.markdown('<div class="metric-card">', unsafe_allow_html=True); st.metric("📌 Total Activities", len(st.session_state.activities)); st.markdown('</div>', unsafe_allow_html=True)
-        with c3: st.markdown('<div class="metric-card">', unsafe_allow_html=True); st.metric("🔴 Critical Activities", len(critical_activities)); st.markdown('</div>', unsafe_allow_html=True)
-        with c4: st.markdown('<div class="metric-card">', unsafe_allow_html=True); st.metric("🛤️ Total Paths", len(path_info)); st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("### 🎯 Project Summary")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("🕒 Project Duration", f"{project_duration} days")
+        with col2:
+            st.metric("📌 Critical Activities", len(critical_activities))
+        with col3:
+            st.metric("🔗 Total Activities", len(st.session_state.activities))
 
-        st.markdown("---")
-        L,R = st.columns([1,1])
-        with L:
-            st.markdown("### 🎯 Critical Path")
-            st.success(f"**Activities:** {critical_path_info['activities']}")
-            st.info(f"**Nodes:** {critical_path_info['path']}")
-            st.warning(f"**Duration:** {critical_path_info['duration']} days")
-            crit_df = pd.DataFrame([{'Activity':a,'Duration':activity_metrics[a]['duration'],'Total Slack':activity_metrics[a]['TS']} for a in critical_activities])
-            st.dataframe(crit_df, use_container_width=True, hide_index=True)
-        with R:
-            st.markdown("### 🛤️ All Possible Paths")
-            for i,p in enumerate(path_info,1):
-                is_crit = i==1
-                icon = "🔴" if is_crit else "🔵"
-                with st.expander(f"{icon} Path {i} - {p['duration']} days {'(CRITICAL)' if is_crit else ''}"):
-                    st.write(f"**Nodes:** {p['path']}")
-                    st.write(f"**Activities:** {p['activities']}")
-                    st.write(f"**Duration:** {p['duration']} days")
+        st.markdown("#### 🔴 Critical Path Activities")
+        st.info(' → '.join(critical_activities))
 
-    # --------------------- AOA ---------------------
+        st.markdown("#### 📍 All Possible Paths")
+        path_df = pd.DataFrame(path_info)
+        def highlight_critical_path(row):
+            return ['background-color: #ffcccc']*len(row) if row['Critical']=='Yes' else ['']*len(row)
+        st.dataframe(path_df.style.apply(highlight_critical_path, axis=1), use_container_width=True, hide_index=True)
+
+    # --------------------- AOA DIAGRAM ---------------------
     with tab2:
         st.markdown("### 🗺️ Activity-on-Arrow (AOA) Network Diagram")
-        fig, ax = plt.subplots(figsize=(20,12))
-        pos, lanes = hierarchical_layout_aoa(G)
+        fig, ax = plt.subplots(figsize=(16, 10))
+        pos, lanes = hierarchical_layout_aoa(G)  # lanes kebaca, gak wajib dipakai
 
-        # nodes
+        # Identify critical edges
+        critical_edges = set()
+        for i in range(len(critical_activities) - 1):
+            curr = critical_activities[i]
+            nxt = critical_activities[i + 1]
+            for a in st.session_state.activities:
+                if a['Activity'] == curr:
+                    start_node_curr = a['Final Node']
+                if a['Activity'] == nxt:
+                    start_node_nxt = a['Initial Node']
+            if start_node_curr == start_node_nxt:
+                # Find edge
+                for a in st.session_state.activities:
+                    if a['Activity'] == curr:
+                        u, v = a['Initial Node'], a['Final Node']
+                        critical_edges.add((u, v))
+                for a in st.session_state.activities:
+                    if a['Activity'] == nxt:
+                        u, v = a['Initial Node'], a['Final Node']
+                        critical_edges.add((u, v))
+
+        # Draw all edges with labels
+        for u, v, data in G.edges(data=True):
+            x1, y1 = pos[u]; x2, y2 = pos[v]
+            is_critical = (u, v) in critical_edges
+            color = 'red' if is_critical else 'gray'
+            lw = 3 if is_critical else 1.5
+            ax.plot([x1, x2], [y1, y2], color=color, linewidth=lw, zorder=1)
+            mx, my = (x1 + x2) / 2, (y1 + y2) / 2
+            label = f"{data['activity']}\n({data['duration']})"
+            ax.text(mx, my + 0.3, label, fontsize=11, ha='center', va='center',
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='lightyellow', edgecolor='black', linewidth=1.2),
+                    fontweight='bold' if is_critical else 'normal', zorder=3)
+
+        # Draw nodes
         for n in G.nodes():
-            x,y = pos[n]
-            circ = plt.Circle((x,y), 0.35, color='lightblue', ec='black', linewidth=2.5, zorder=4)
-            ax.add_patch(circ)
-            ax.text(x, y, str(n), ha='center', va='center', fontsize=16, fontweight='bold', zorder=5)
+            x, y = pos[n]
+            color = '#90EE90' if n == start_node else '#FFB6C6' if n == end_node else 'lightblue'
+            circle = plt.Circle((x, y), 0.5, color=color, ec='black', linewidth=2.5, zorder=2)
+            ax.add_patch(circle)
+            ax.text(x, y, str(n), fontsize=16, fontweight='bold', ha='center', va='center', zorder=4)
 
-        # edges + labels (mid-curve)
-        edge_count = defaultdict(int)
-        for act in st.session_state.activities:
-            u,v = act['Initial Node'], act['Final Node']
-            a = act['Activity']; d = act['Duration']
-            if u not in pos or v not in pos: continue
-            crit = a in critical_activities
-            color = 'red' if crit else 'gray'
-            lw = 3.5 if crit else 2
-
-            x1,y1 = pos[u]; x2,y2 = pos[v]
-            dx,dy = x2-x1, y2-y1
-            L = np.hypot(dx,dy); 
-            if L < 1e-6: continue
-            nx_, ny_ = dx/L, dy/L
-            sx, sy = x1+nx_*0.35, y1+ny_*0.35
-            ex, ey = x2-nx_*0.35, y2-ny_*0.35
-
-            edge_key=(u,v); edge_count[edge_key]+=1; k=edge_count[edge_key]
-            x_spacing_local=3.5
-            col_gap=max(1,int(round(abs(dx)/x_spacing_local)))
-            rad=(0.18+0.08*(col_gap-1))
-            if k%2==0: rad=-rad
-            if abs(dy)<0.3: rad*=1.2
-
-            arrow = FancyArrowPatch((sx,sy),(ex,ey), arrowstyle='->', mutation_scale=25,
-                                    color=color, linewidth=lw, connectionstyle=f"arc3,rad={rad}", zorder=2)
-            ax.add_patch(arrow)
-
-            mx,my=(x1+x2)/2,(y1+y2)/2
-            k_off=0.5
-            ox,oy= -ny_*rad*k_off, nx_*rad*k_off
-            lx,ly= mx+ox, my+oy
-            bbox_color = '#ffcccc' if crit else '#ffffcc'
-            ax.text(lx, ly, f"{a} = {d}", fontsize=11, fontweight='bold',
-                    bbox=dict(boxstyle='round,pad=0.5', facecolor=bbox_color, edgecolor='black', linewidth=1.5),
-                    ha='center', zorder=6)
-
-        ax.set_title("Activity-on-Arrow (AOA) Network Diagram\n(Semua aktivitas dari tabel ditampilkan dengan panah melengkung)", fontsize=18, fontweight='bold', pad=20)
-        ax.axis('equal'); ax.axis('off')
         from matplotlib.lines import Line2D
-        ax.legend([Line2D([0],[0],color='red',lw=3.5,label='Critical Path'),
-                   Line2D([0],[0],color='gray',lw=2,label='Non-Critical Path')],
-                   ['Critical Path','Non-Critical Path'], loc='upper right', fontsize=12)
-        plt.tight_layout()
+        legend_elements = [
+            Line2D([0], [0], color='red', lw=3, label='Critical Path'),
+            Line2D([0], [0], color='gray', lw=1.5, label='Non-Critical Path'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='#90EE90', markersize=12,
+                   markeredgecolor='black', markeredgewidth=2, label='Start Node', linestyle='None'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='#FFB6C6', markersize=12,
+                   markeredgecolor='black', markeredgewidth=2, label='End Node', linestyle='None'),
+        ]
+        ax.legend(handles=legend_elements, loc='upper right', fontsize=12, framealpha=0.95)
+        ax.set_title("Activity-on-Arrow (AOA) Network Diagram", fontsize=18, fontweight='bold', pad=20)
+        ax.axis('equal'); ax.axis('off'); plt.tight_layout()
         st.pyplot(fig)
 
-        with st.expander("🔍 Verifikasi: Semua Aktivitas yang Digambar"):
-            verify_df = pd.DataFrame([{
-                'Activity': a['Activity'],
-                'From Node': a['Initial Node'],
-                'To Node':   a['Final Node'],
-                'Duration':  a['Duration'],
-                'Status':    '🔴 Critical' if a['Activity'] in critical_activities else '⚪ Normal'
-            } for a in st.session_state.activities])
-            st.dataframe(verify_df, use_container_width=True, hide_index=True)
-
-    # --------------------- PDM ---------------------
+    # --------------------- PDM DIAGRAM ---------------------
     with tab3:
-        st.markdown("### 📦 Precedence Diagramming Method (PDM) - Activity on Node")
-        fig, ax = plt.subplots(figsize=(22,14))
+        st.markdown("### 📐 Precedence Diagramming Method (PDM)")
 
-        # group by ES level
+        # lane assignment by activity metrics
+        def act_lane(act_name):
+            m = activity_metrics[act_name]
+            if m['TS'] == 0: return 0  # critical lane
+            # non-critical: group by ES
+            es_val = m['ES']
+            return 1 + (es_val % 3)
+
+        # build ES-level groups
         es_levels = defaultdict(list)
         for a in st.session_state.activities:
-            es = activity_metrics[a['Activity']]['ES']
-            es_levels[es].append(a['Activity'])
+            m = activity_metrics[a['Activity']]
+            es_levels[m['ES']].append(a['Activity'])
+
         sorted_es = sorted(es_levels.keys())
-
-        # map lane from AOA by initial node
-        def act_lane(act_name):
-            row = next(r for r in st.session_state.activities if r["Activity"]==act_name)
-            return lanes.get(row["Initial Node"], 0)
-
-        x_spacing, y_spacing = 4.5, 3.0
+        x_spacing, y_spacing = 4.5, 2.5
         pdm_pos = {}
+
+        # position per ES level
         for level_idx, es in enumerate(sorted_es):
             # kelompokkan per lane dalam level yang sama
             by_lane = defaultdict(list)
@@ -432,6 +677,8 @@ try:
         start_y = median(level_first_ys)
         finish_x = max(x for x,_ in pdm_pos.values()) + x_spacing
         finish_y = median(level_last_ys)
+
+        fig, ax = plt.subplots(figsize=(18, 12))
 
         # START box
         start_x = min(x for x,_ in pdm_pos.values()) - x_spacing
