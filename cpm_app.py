@@ -8,6 +8,16 @@ from collections import defaultdict
 
 st.set_page_config(page_title="Critical Path Method Analysis", layout="wide")
 
+# --- Formatter angka: 0 -> "0", 1.5 -> "1,5", 1.50000 -> "1,5" ---
+def fmt(x):
+    try:
+        xv = float(x)
+        if xv.is_integer():
+            return str(int(xv))
+        return f"{xv:g}".replace(".", ",")
+    except Exception:
+        return str(x)
+
 # --------------------- UI STYLES ---------------------
 st.markdown("""
 <style>
@@ -72,9 +82,9 @@ with st.sidebar:
         df, num_rows="dynamic", use_container_width=True,
         column_config={
             "Activity": st.column_config.TextColumn("Activity", required=True),
-            "Initial Node": st.column_config.NumberColumn("Initial Node", required=True, min_value=1),
-            "Final Node": st.column_config.NumberColumn("Final Node", required=True, min_value=1),
-            "Duration": st.column_config.NumberColumn("Duration", required=True, min_value=0),
+            "Initial Node": st.column_config.NumberColumn("Initial Node", required=True, min_value=1, format="%g"),
+            "Final Node": st.column_config.NumberColumn("Final Node", required=True, min_value=1, format="%g"),
+            "Duration": st.column_config.NumberColumn("Duration", required=True, min_value=0, format="%g"),
         }
     )
     if st.button("🔄 Update & Calculate", type="primary", use_container_width=True):
@@ -563,8 +573,13 @@ try:
         path_df = pd.DataFrame(path_info)
         def highlight_critical_path(row):
             return ['background-color: #ffcccc']*len(row) if row['Critical']=='Yes' else ['']*len(row)
-        st.dataframe(path_df.style.apply(highlight_critical_path, axis=1), use_container_width=True, hide_index=True)
-
+        st.dataframe(
+            path_df.style
+                .apply(highlight_critical_path, axis=1)
+                .format(fmt),
+            use_container_width=True,
+            hide_index=True
+        )
     # --------------------- AOA DIAGRAM ---------------------
     with tab2:
         st.markdown("### 🗺️ Activity-on-Arrow (AOA) Network Diagram")
@@ -708,16 +723,15 @@ try:
             ax.text(x, y-0.25, f"D={m['duration']}", ha='center', va='center', fontsize=11, style='italic')
 
             cs=9
-            ax.text(x-0.7, y+0.48, f"ES\n{m['ES']}", ha='center', va='center', fontsize=cs, color='blue', fontweight='bold')
-            ax.text(x+0.7, y+0.48, f"EF\n{m['EF']}", ha='center', va='center', fontsize=cs, color='blue', fontweight='bold')
-            ax.text(x-0.7, y-0.48, f"LS\n{m['LS']}", ha='center', va='center', fontsize=cs, color='green', fontweight='bold')
-            ax.text(x+0.7, y-0.48, f"LF\n{m['LF']}", ha='center', va='center', fontsize=cs, color='green', fontweight='bold')
+            ax.text(x-0.7, y+0.48, f"ES\n{fmt(m['ES'])}", ha='center', va='center', fontsize=cs, color='blue', fontweight='bold')
+            ax.text(x+0.7, y+0.48, f"EF\n{fmt(m['EF'])}", ha='center', va='center', fontsize=cs, color='blue', fontweight='bold')
+            ax.text(x-0.7, y-0.48, f"LS\n{fmt(m['LS'])}", ha='center', va='center', fontsize=cs, color='green', fontweight='bold')
+            ax.text(x+0.7, y-0.48, f"LF\n{fmt(m['LF'])}", ha='center', va='center', fontsize=cs, color='green', fontweight='bold')
 
-            ax.text(x, y-0.95, f"TS: {m['TS']}", ha='center', va='center',
+            ax.text(x, y-0.95, f"TS: {fmt(m['TS'])}", ha='center', va='center',
                     fontsize=9, bbox=dict(boxstyle='round,pad=0.35', facecolor='#fff9c4', edgecolor='black', linewidth=1.2))
-            ax.text(x, y+0.95, f"FF: {m['FF']}", ha='center', va='center',
+            ax.text(x, y+0.95, f"FF: {fmt(m['FF'])}", ha='center', va='center',
                     fontsize=9, bbox=dict(boxstyle='round,pad=0.35', facecolor='#c8e6c9', edgecolor='black', linewidth=1.2))
-
         # arrows between activities
         drawn_arrows=set()
         for a in st.session_state.activities:
@@ -798,8 +812,13 @@ try:
         metrics_df = pd.DataFrame(rows)
         def highlight_critical(row):
             return ['background-color: #ffcccc']*len(row) if row['Critical']=='✓' else ['']*len(row)
-        st.dataframe(metrics_df.style.apply(highlight_critical, axis=1), use_container_width=True, hide_index=True)
-
+        st.dataframe(
+            metrics_df.style
+                .apply(highlight_critical, axis=1)
+                .format(fmt, subset=["Duration","ES","EF","LS","LF","Total Slack","Free Float"]),
+            use_container_width=True,
+            hide_index=True
+        )
         st.markdown("---")
         c1,c2 = st.columns(2)
         with c1:
