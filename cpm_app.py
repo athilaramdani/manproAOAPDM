@@ -62,17 +62,19 @@ st.markdown('<div class="main-header"><h1>📊 Critical Path Method (CPM) Analys
 # --------------------- DATA ---------------------
 if 'activities' not in st.session_state:
     st.session_state.activities = [
-        {"Activity": "A", "Initial Node": 1, "Final Node": 2, "Duration": 3},
-        {"Activity": "B", "Initial Node": 2, "Final Node": 3, "Duration": 4},
-        {"Activity": "C", "Initial Node": 2, "Final Node": 6, "Duration": 6},
-        {"Activity": "D", "Initial Node": 3, "Final Node": 4, "Duration": 9},
-        {"Activity": "E", "Initial Node": 3, "Final Node": 5, "Duration": 3},
-        {"Activity": "F", "Initial Node": 4, "Final Node": 5, "Duration": 6},
-        {"Activity": "G", "Initial Node": 5, "Final Node": 6, "Duration": 9},
-        {"Activity": "H", "Initial Node": 4, "Final Node": 7, "Duration": 5},
-        {"Activity": "I", "Initial Node": 5, "Final Node": 7, "Duration": 8},
-        {"Activity": "J", "Initial Node": 6, "Final Node": 7, "Duration": 2},
+        {"Activity": "A", "Initial Node": 1, "Final Node": 2, "Duration": 2},
+        {"Activity": "B", "Initial Node": 2, "Final Node": 3, "Duration": 2},
+        {"Activity": "C", "Initial Node": 2, "Final Node": 4, "Duration": 3},
+        {"Activity": "D", "Initial Node": 2, "Final Node": 5, "Duration": 4},
+        {"Activity": "E", "Initial Node": 3, "Final Node": 6, "Duration": 2},
+        {"Activity": "F", "Initial Node": 4, "Final Node": 6, "Duration": 3},
+        {"Activity": "G", "Initial Node": 5, "Final Node": 7, "Duration": 6},
+        {"Activity": "H", "Initial Node": 6, "Final Node": 8, "Duration": 2},
+        {"Activity": "I", "Initial Node": 6, "Final Node": 7, "Duration": 5},
+        {"Activity": "J", "Initial Node": 7, "Final Node": 8, "Duration": 1},
+        {"Activity": "K", "Initial Node": 8, "Final Node": 9, "Duration": 2},
     ]
+
 
 with st.sidebar:
     st.header("📝 Input Data")
@@ -715,23 +717,57 @@ try:
             name=a['Activity']; m=activity_metrics[name]
             crit = name in critical_activities
             x,y = pdm_pos[name]
-            box = FancyBboxPatch((x-0.9, y-0.65), 1.8, 1.3, boxstyle="round,pad=0.08",
-                                 edgecolor='black', facecolor=('#ffcccc' if crit else '#cce5ff'),
-                                 linewidth=(3 if crit else 1.8))
+            BOX_W = 2.4   # lebar box aktivitas (default sebelumnya 1.8)
+            BOX_H = 1.8   # tinggi box aktivitas (default sebelumnya 1.3)
+            CORNER_PAD = 0.10  # paddings sudut untuk FancyBboxPatch
+            FONT_MAIN = 16     # nama aktivitas
+            FONT_DUR = 11      # "D=..."
+            FONT_CORNER = 10   # ES/EF/LS/LF
+            FONT_TAG = 9       # TS/FF
+
+            # Offset teks di dalam box (relatif ke BOX_W/BOX_H)
+            # kiri/kanan atas/bawah (pojok)
+            OFF_X = BOX_W/2 - 0.2
+            OFF_Y = BOX_H/2 - 0.17
+
+            # label TS/FF di luar box
+            TAG_GAP = 0.30  # jarak label TS/FF dari sisi box
+
+            # Panah masuk/keluar box
+            ARROW_INSET = BOX_W/2   # jarak ujung panah dari pusat menuju tepi box
+
+            # Perbesar jarak antar level/lane kalau kotaknya makin gede
+            box = FancyBboxPatch((x-BOX_W/2, y-BOX_H/2), BOX_W, BOX_H,
+                     boxstyle=f"round,pad={CORNER_PAD}",
+                     edgecolor='black',
+                     facecolor=('#ffcccc' if crit else '#cce5ff'),
+                     linewidth=(3 if crit else 1.8))
             ax.add_patch(box)
-            ax.text(x, y+0.08, name, ha='center', va='center', fontsize=16, fontweight='bold')
-            ax.text(x, y-0.25, f"D={m['duration']}", ha='center', va='center', fontsize=11, style='italic')
 
-            cs=9
-            ax.text(x-0.7, y+0.48, f"ES\n{fmt(m['ES'])}", ha='center', va='center', fontsize=cs, color='blue', fontweight='bold')
-            ax.text(x+0.7, y+0.48, f"EF\n{fmt(m['EF'])}", ha='center', va='center', fontsize=cs, color='blue', fontweight='bold')
-            ax.text(x-0.7, y-0.48, f"LS\n{fmt(m['LS'])}", ha='center', va='center', fontsize=cs, color='green', fontweight='bold')
-            ax.text(x+0.7, y-0.48, f"LF\n{fmt(m['LF'])}", ha='center', va='center', fontsize=cs, color='green', fontweight='bold')
+            # Nama & Durasi (posisi relatif supaya proporsional saat diperbesar)
+            ax.text(x, y+0.08, name, ha='center', va='center',
+                    fontsize=FONT_MAIN, fontweight='bold')
+            ax.text(x, y-0.25, f"D={m['duration']}", ha='center', va='center',
+                    fontsize=FONT_DUR, style='italic')
 
-            ax.text(x, y-0.95, f"TS: {fmt(m['TS'])}", ha='center', va='center',
-                    fontsize=9, bbox=dict(boxstyle='round,pad=0.35', facecolor='#fff9c4', edgecolor='black', linewidth=1.2))
-            ax.text(x, y+0.95, f"FF: {fmt(m['FF'])}", ha='center', va='center',
-                    fontsize=9, bbox=dict(boxstyle='round,pad=0.35', facecolor='#c8e6c9', edgecolor='black', linewidth=1.2))
+            # ES/EF/LS/LF sudut (pakai OFF_X/OFF_Y)
+            ax.text(x-OFF_X, y+OFF_Y, f"ES\n{fmt(m['ES'])}", ha='center', va='center',
+                    fontsize=FONT_CORNER, color='blue', fontweight='bold')
+            ax.text(x+OFF_X, y+OFF_Y, f"EF\n{fmt(m['EF'])}", ha='center', va='center',
+                    fontsize=FONT_CORNER, color='blue', fontweight='bold')
+            ax.text(x-OFF_X, y-OFF_Y, f"LS\n{fmt(m['LS'])}", ha='center', va='center',
+                    fontsize=FONT_CORNER, color='green', fontweight='bold')
+            ax.text(x+OFF_X, y-OFF_Y, f"LF\n{fmt(m['LF'])}", ha='center', va='center',
+                    fontsize=FONT_CORNER, color='green', fontweight='bold')
+
+            # TS bawah & FF atas (pakai TAG_GAP dari sisi box)
+            ax.text(x, y-(BOX_H/2 + TAG_GAP), f"TS: {fmt(m['TS'])}", ha='center', va='center',
+                    fontsize=FONT_TAG, bbox=dict(boxstyle='round,pad=0.35', facecolor='#fff9c4', edgecolor='black', linewidth=1.2))
+            ax.text(x, y+(BOX_H/2 + TAG_GAP), f"FF: {fmt(m['FF'])}", ha='center', va='center',
+                    fontsize=FONT_TAG, bbox=dict(boxstyle='round,pad=0.35', facecolor='#c8e6c9', edgecolor='black', linewidth=1.2))
+                        
+
+
         # arrows between activities
         drawn_arrows=set()
         for a in st.session_state.activities:
@@ -749,8 +785,9 @@ try:
                 color = 'red' if is_crit else 'gray'
                 lw = 3 if is_crit else 1.5
                 dy=abs(y2-y1); rad = 0.25 if dy>2.5 else 0.15
-                arr = FancyArrowPatch((x1+0.9,y1),(x2-0.9,y2), arrowstyle='->', mutation_scale=25,
-                                      color=color, linewidth=lw, connectionstyle=f"arc3,rad={rad}")
+                arr = FancyArrowPatch((x1 + ARROW_INSET, y1), (x2 - ARROW_INSET, y2),
+                      arrowstyle='->', mutation_scale=28,
+                      color=color, linewidth=lw, connectionstyle=f"arc3,rad={rad}")
                 ax.add_patch(arr); drawn_arrows.add((act,nxt_act))
 
         # arrows from START to first-level activities
